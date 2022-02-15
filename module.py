@@ -13,12 +13,13 @@
 #   limitations under the License.
 
 """ Module """
-from pylon.core.tools import log  # pylint: disable=E0611,E0401
+from pylon.core.tools import log, web  # pylint: disable=E0611,E0401
 from pylon.core.tools import module  # pylint: disable=E0611,E0401
 
 from .init_db import init_db
 
 from ..shared.utils.api_utils import add_resource_to_api
+from ..shared.utils.render import render_template_base
 
 
 class Module(module.ModuleModel):
@@ -71,3 +72,11 @@ class Module(module.ModuleModel):
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
         log.info(f'De-initializing module {self.descriptor.name}')
+
+    @web.route('/')
+    def index(self):
+        # return render_template_base(
+        #     'my_plugin:template.html',
+        #     config={'some': 'data'}
+        # )
+        ...
