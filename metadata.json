@@ -1,0 +1,6 @@
+{
+  "name": "Plugin",
+  "version": "0.1",
+  "depends_on": ["shared"],
+  "init_after": []
+}
