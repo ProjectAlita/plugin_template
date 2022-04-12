@@ -14,3 +14,30 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
+""" DB migration """
+
+revision = "202202171813"
+down_revision = "202202161207"
+branch_labels = None
+
+
+from alembic import op
+import sqlalchemy as sa
+import sqlalchemy.dialects.postgresql as psql
+
+
+def upgrade(module, payload):
+    module_name = module.descriptor.name
+    #
+    op.create_table(
+        f"{module_name}__demo",
+        sa.Column("key", sa.Text, primary_key=True, index=True),
+        sa.Column("data", psql.JSONB),
+    )
+
+
+def downgrade(module, payload):
+    module_name = module.descriptor.name
+    #
+    op.drop_table(f"{module_name}__demo")

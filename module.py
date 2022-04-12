@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# coding=utf-8
+
 #   Copyright 2022 getcarrier.io
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +16,18 @@
 #   limitations under the License.
 
 """ Module """
-from pylon.core.tools import log, web  # pylint: disable=E0611,E0401
-from pylon.core.tools import module  # pylint: disable=E0611,E0401
 
-from .init_db import init_db
+# import sqlalchemy  # pylint: disable=E0401
 
-from ..shared.utils.api_utils import add_resource_to_api
-from ..shared.utils.render import render_template_base
+from pylon.core.tools import log  # pylint: disable=E0401
+from pylon.core.tools import module  # pylint: disable=E0401
+from pylon.core.tools.context import Context as Holder  # pylint: disable=E0401
+
+from tools import theme  # pylint: disable=E0401
+from tools import db  # pylint: disable=E0401
+from tools import db_migrations  # pylint: disable=E0401
+
+from .db import init_db
 
 
 class Module(module.ModuleModel):
@@ -28,55 +36,60 @@ class Module(module.ModuleModel):
     def __init__(self, context, descriptor):
         self.context = context
         self.descriptor = descriptor
+        #
+        self.db = Holder()  # pylint: disable=C0103
+        self.db.tbl = Holder()
 
     def init(self):
         """ Init module """
-        log.info(f'Initializing module {self.descriptor.name}')
-
-        init_db()
-
-        # blueprint endpoints
+        log.info("Initializing module")
+        # Run DB migrations
+        db_migrations.run_db_migrations(self, db.url)
+        # DB
+        init_db(self)
+        # Theme registration
+        theme.register_section(
+            "demo", "Demo",
+            kind="holder",
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_subsection(
+            "demo",
+            "subdemo", "Sub Demo",
+            title="Subsection Demo",
+            kind="slot",
+            prefix="demo_slot_",
+            icon_class="fas fa-server fa-fw",
+            weight=2,
+        )
+        theme.register_page(
+            "demo", "subdemo", "view",
+            title="Demo View",
+            kind="slot",
+            prefix="demo_slot_view_",
+        )
+        # Init RPCs
+        self.descriptor.init_rpcs()
+        # Init API
+        self.descriptor.init_api()
+        # Init SocketIO
+        self.descriptor.init_sio()
+        # Init blueprint
         self.descriptor.init_blueprint()
-
-        # rpc functions
-        self.init_rpc()
-
-        # api
-        self.init_api()
-
-        # slots
-        self.init_slots()
-
-    def init_rpc(self):
-        # self.context.rpc_manager.register_function(
-        #     lambda: f'{self.descriptor.name} says hello!',
-        #     name=f'hello_from_{self.descriptor.name}'
-        # )
-
-        ...
-
-    def init_api(self):
-        # add_resource_to_api(
-        #     self.context.api,
-        #     your_func,
-        #     '/your/rule/1',
-        #     '/your/rule/2',
-        # )
-
-        ...
-
-    def init_slots(self):
-        # self.context.slot_manager.register_callback('you_slot_name', your_slot_function)
-        ...
+        # Init slots
+        self.descriptor.init_slots()
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
-        log.info(f'De-initializing module {self.descriptor.name}')
-
-    @web.route('/')
-    def index(self):
-        # return render_template_base(
-        #     'my_plugin:template.html',
-        #     config={'some': 'data'}
-        # )
-        ...
+        log.info("De-initializing module")
+        # De-init slots
+        # self.descriptor.deinit_slots()
+        # De-init blueprint
+        # self.descriptor.deinit_blueprint()
+        # De-init SocketIO
+        # self.descriptor.deinit_sio()
+        # De-init API
+        # self.descriptor.deinit_api()
+        # De-init RPCs
+        # self.descriptor.deinit_rpcs()

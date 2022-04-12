@@ -14,3 +14,22 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
+import sqlalchemy  # pylint: disable=E0401
+
+from tools import db  # pylint: disable=E0401
+
+from ..shared.db_manager import Base, engine
+
+
+def init_db(module):
+    """ Init DB """
+    module_name = module.descriptor.name
+    module.db.metadata = sqlalchemy.MetaData()
+    module.db.tbl.demo = sqlalchemy.Table(
+        f"{module_name}__demo", module.db.metadata,
+        autoload_with=db.engine,
+    )
+    #
+    # from .models.your_module import YourModel
+    Base.metadata.create_all(bind=engine)
