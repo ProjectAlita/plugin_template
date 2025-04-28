@@ -17,15 +17,12 @@
 
 """ API """
 
-import flask  # pylint: disable=E0401,W0611
-import flask_restful  # pylint: disable=E0401
-
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
-from tools import auth  # pylint: disable=E0401
+from tools import api_tools, auth, config as c  # pylint: disable=E0401
 
 
-class API(flask_restful.Resource):  # pylint: disable=R0903
+class DefaultAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     """
         API Resource
 
@@ -46,14 +43,27 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         - access_denied_reply={"ok": False, "error": "access_denied"},
     """
 
+    # @auth.decorators.check_api({
+    #     "permissions": ["models.plugin_template.myapi.get"],
+    #     "recommended_roles": {
+    #         c.ADMINISTRATION_MODE: {"admin": True, "editor": True, "viewer": False},
+    #         c.DEFAULT_MODE: {"admin": True, "editor": True, "viewer": False},
+    #     },
+    # })
+    # @api_tools.endpoint_metrics
+    # def post(self, project_id: int, arg1: str | None = None):  # pylint: disable=R0201
+    #     """ Process POST """
+    #     # data = flask.request.json
+    #     # ...
+    #     return {"ok": True, "mydata": 42}
 
-    def __init__(self, module):
-        self.module = module
 
+class API(api_tools.APIBase):
+    url_params = api_tools.with_modes([
+        '<int:project_id>',
+        '<int:project_id>/<string:arg1>',
+    ])
 
-    @auth.decorators.check_api(["global_admin"])
-    def post(self):  # pylint: disable=R0201
-        """ Process POST """
-        # data = flask.request.json
-        # ...
-        return {"ok": True, "mydata": 42}
+    mode_handlers = {
+        c.DEFAULT_MODE: DefaultAPI
+    }

@@ -17,17 +17,8 @@
 
 """ Module """
 
-# import sqlalchemy  # pylint: disable=E0401
 
-from pylon.core.tools import log  # pylint: disable=E0401
-from pylon.core.tools import module  # pylint: disable=E0401
-from pylon.core.tools.context import Context as Holder  # pylint: disable=E0401
-
-from tools import theme  # pylint: disable=E0401
-from tools import db  # pylint: disable=E0401
-from tools import db_migrations  # pylint: disable=E0401
-
-from .db import init_db
+from pylon.core.tools import module, log  # pylint: disable=E0401
 
 
 class Module(module.ModuleModel):
@@ -36,60 +27,8 @@ class Module(module.ModuleModel):
     def __init__(self, context, descriptor):
         self.context = context
         self.descriptor = descriptor
-        #
-        self.db = Holder()  # pylint: disable=C0103
-        self.db.tbl = Holder()
 
     def init(self):
         """ Init module """
-        log.info("Initializing module")
-        # Run DB migrations
-        db_migrations.run_db_migrations(self, db.url)
-        # DB
-        init_db(self)
-        # Theme registration
-        theme.register_section(
-            "demo", "Demo",
-            kind="holder",
-            location="left",
-            icon_class="fas fa-info-circle fa-fw",
-        )
-        theme.register_subsection(
-            "demo",
-            "subdemo", "Sub Demo",
-            title="Subsection Demo",
-            kind="slot",
-            prefix="demo_slot_",
-            icon_class="fas fa-server fa-fw",
-            weight=2,
-        )
-        theme.register_page(
-            "demo", "subdemo", "view",
-            title="Demo View",
-            kind="slot",
-            prefix="demo_slot_view_",
-        )
         # Init RPCs
-        self.descriptor.init_rpcs()
-        # Init API
-        self.descriptor.init_api()
-        # Init SocketIO
-        self.descriptor.init_sio()
-        # Init blueprint
-        self.descriptor.init_blueprint()
-        # Init slots
-        self.descriptor.init_slots()
-
-    def deinit(self):  # pylint: disable=R0201
-        """ De-init module """
-        log.info("De-initializing module")
-        # De-init slots
-        # self.descriptor.deinit_slots()
-        # De-init blueprint
-        # self.descriptor.deinit_blueprint()
-        # De-init SocketIO
-        # self.descriptor.deinit_sio()
-        # De-init API
-        # self.descriptor.deinit_api()
-        # De-init RPCs
-        # self.descriptor.deinit_rpcs()
+        self.descriptor.init_all()
