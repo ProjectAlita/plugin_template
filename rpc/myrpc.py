@@ -43,18 +43,7 @@ class RPC:  # pylint: disable=E1101,R0903
     """
 
 
-    @web.rpc("demo_do_smth", "do_smth")
+    @web.rpc("plugin_template_do_smth", "do_smth")
     @rpc_tools.wrap_exceptions(RuntimeError)
-    def _do_smth(self, key, default=...):
-        try:
-            with db.engine.connect() as connection:
-                item = connection.execute(
-                    self.db.tbl.demo.select().where(
-                        self.db.tbl.demo.c.key == key,
-                    )
-                ).mappings().one()
-            return db_tools.sqlalchemy_mapping_to_dict(item)["data"]
-        except:  # pylint: disable=W0702
-            if default is ...:
-                default = dict()
-            return default
+    def do_smth(self, arg1) -> str:
+        return f'hello from {arg1}'

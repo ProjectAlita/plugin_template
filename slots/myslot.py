@@ -42,20 +42,20 @@ class Slot:  # pylint: disable=E1101,R0903
     """
 
 
-    @web.slot("demo_slot_content")
-    @auth.decorators.check_slot(["my_permission"], access_denied_reply=theme.access_denied_part)
-    def _demo_content(self, context, slot, payload):
-        _ = slot
-        #
-        try:
-            page = int(payload.request.args.get("page", "1"))
-        except:  # pylint: disable=W0702
-            page = 1
-        #
-        search = payload.request.args.get("search", None)
-        #
-        with context.app.app_context():
-            return self.descriptor.render_template(
-                "some/template.html",
-                page=page, search=search,
-            )
+    # @web.slot("demo_slot_content")
+    # @auth.decorators.check_slot(["my_permission"], access_denied_reply=theme.access_denied_part)
+    # def _demo_content(self, context, slot, payload):
+    #     _ = slot
+    #     #
+    #     try:
+    #         page = int(payload.request.args.get("page", "1"))
+    #     except:  # pylint: disable=W0702
+    #         page = 1
+    #     #
+    #     search = payload.request.args.get("search", None)
+    #     #
+    #     with context.app.app_context():
+    #         return self.descriptor.render_template(
+    #             "some/template.html",
+    #             page=page, search=search,
+    #         )
